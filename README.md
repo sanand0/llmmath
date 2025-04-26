@@ -341,6 +341,7 @@ To run this, get an [OpenRouter API key](https://openrouter.ai/settings/keys) an
 git clone git@github.com:sanand0/llmmath.git
 cd llmmath
 export OPENROUTER_API_KEY=...
+export OPENAI_API_KEY=...
 npx promptfoo eval --config multiplication.yaml
 npx promptfoo export latest -o multiplication.json
 ```
