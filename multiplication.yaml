@@ -1,0 +1,100 @@
+# Describe the suite
+description: "Integer multiplication capability tests"
+
+# Which models to run
+providers:
+  # O3 requires adding an OpenAI API key to OpenRouter as of 2025-04-26, so use OpenAI directly
+  - {id: openai:o3, config: { max_tokens: 8192} }
+  # These reasoning models need more than the default 1024 tokens
+  - {id: openrouter:openai/o3-mini-high, config: { max_tokens: 8192} }
+  - {id: openrouter:openai/o4-mini-high, config: { max_tokens: 8192} }
+  - {id: openrouter:openai/o4-mini, config: { max_tokens: 8192} }
+  - {id: openrouter:openai/o3-mini, config: { max_tokens: 8192} }
+  - {id: openrouter:openai/o1-mini, config: { max_tokens: 8192} }
+  - openrouter:amazon/nova-micro-v1
+  - openrouter:amazon/nova-lite-v1
+  - openrouter:amazon/nova-pro-v1
+  - openrouter:openai/gpt-4.1
+  - openrouter:openai/gpt-4.1-mini
+  - openrouter:openai/gpt-4.1-nano
+  - openrouter:openai/gpt-4.5-preview
+  - openrouter:openai/gpt-4o-mini
+  - openrouter:openai/gpt-4o
+  - openrouter:openai/gpt-4-turbo
+  - openrouter:openai/gpt-3.5-turbo
+  - openrouter:google/gemini-2.5-pro-preview-03-25
+  - openrouter:google/gemini-2.5-flash-preview
+  - openrouter:google/gemini-2.5-flash-preview:thinking
+  - openrouter:google/gemini-2.0-flash-001
+  - openrouter:google/gemini-2.0-flash-lite-001
+  - openrouter:google/gemini-pro-1.5
+  - openrouter:google/gemini-flash-1.5
+  - openrouter:google/gemini-flash-1.5-8b
+  - openrouter:google/gemma-3-1b-it:free
+  - openrouter:google/gemma-3-4b-it
+  - openrouter:google/gemma-3-12b-it
+  - openrouter:google/gemma-3-27b-it
+  - openrouter:anthropic/claude-3.7-sonnet:thinking
+  - openrouter:anthropic/claude-3.5-haiku
+  - openrouter:anthropic/claude-3.5-sonnet
+  - openrouter:anthropic/claude-3-haiku
+  - openrouter:anthropic/claude-3-opus
+  - openrouter:anthropic/claude-3-sonnet
+  - openrouter:meta-llama/llama-4-maverick
+  - openrouter:meta-llama/llama-4-scout
+  - openrouter:meta-llama/llama-3.3-70b-instruct
+  - openrouter:meta-llama/llama-3.2-3b-instruct
+  - openrouter:meta-llama/llama-3.2-1b-instruct
+  - openrouter:meta-llama/llama-3.1-405b-instruct
+  - openrouter:meta-llama/llama-3.1-70b-instruct
+  - openrouter:meta-llama/llama-3.1-8b-instruct
+  - openrouter:meta-llama/llama-3-70b-instruct
+  - openrouter:meta-llama/llama-3-8b-instruct
+  - openrouter:meta-llama/llama-2-70b-chat
+  - openrouter:meta-llama/llama-2-13b-chat
+  - openrouter:deepseek/deepseek-chat-v3-0324
+  - openrouter:deepseek/deepseek-r1
+  - openrouter:qwen/qwen-2-72b-instruct
+
+  # - openrouter:openai/o1-pro                      # Too expensive
+  # - openrouter:openai/o1                          # Too expensive
+  # - openrouter:deepseek/deepseek-chat-v2.5        # No endpoints found
+  # - openrouter:qwen/qwen2.5-32b-instruct          # No endpoints found
+  # - openrouter:qwen/qwen2.5-coder-7b-instruct     # No endpoints found
+  # - openrouter:qwen/qwen-2-7b-instruct            # No endpoints found
+
+
+# A single‐turn prompt template
+prompts:
+  - "Calculate {{a}} times {{b}}. Reply without commas."
+
+# Default assertions for every test case
+defaultTest:
+  assert:
+    # 1) Check the correct numeric answer is present
+    - type: contains
+      value: "{{expected}}"
+
+# Seven test cases from medium to very hard
+tests:
+  - description: "12 x 12"
+    vars: { a: 12, b: 12, expected: 144 }
+  - description: "123 x 456"
+    vars: { a: 123, b: 456, expected: 56088 }
+  - description: "1,234 x 5,678"
+    vars: { a: 1234, b: 5678, expected: 7006652 }
+  - description: "12,345 x 6,789"
+    vars: { a: 12345, b: 6789, expected: 83810205 }
+  - description: "123,456 x 789,012"
+    vars: { a: 123456, b: 789012, expected: 97408265472 }
+  - description: "1,234,567 x 8,901,234"
+    vars: { a: 1234567, b: 8901234, expected: 10989169755678 }
+  - description: "987,654,321 x 123,456,789"
+    vars: { a: 987654321, b: 123456789, expected: 121932631112635269 }
+
+# Persist for the web viewer
+writeLatestResults: true
+
+# Ensure caching stays on
+commandLineOptions:
+  cache: true
