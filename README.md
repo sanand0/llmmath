@@ -1,20 +1,16 @@
 # Can LLMs do mental math?
 
-I asked several LLMs these 7 questions:
+I asked 50 LLMs to multiple 2 numbers:
 
-1. Calculate 12 times 12. Reply without commas.
-2. Calculate 123 times 456. Reply without commas.
-3. Calculate 1,234 times 5,678. Reply without commas.
-4. Calculate 12,345 times 6,789. Reply without commas.
-5. Calculate 123,456 times 789,012. Reply without commas.
-6. Calculate 1,234,567 times 8,901,234. Reply without commas.
-7. Calculate 987,654,321 times 123,456,789. Reply without commas.
+1. 12 x 12
+2. 123 x 456
+3. 1,234 x 5,678
+4. 12,345 x 6,789
+5. 123,456 x 789,012
+6. 1,234,567 x 8,901,234
+7. 987,654,321 x 123,456,789
 
-LLMs _aren't_ a good tool for calculations. This is just an informal check.
-
-## Results
-
-See the results at <http://sanand0.github.io/llmmath/>.
+LLMs aren't good tools for math and this is just an informal check. But the results are interesting:
 
 | Model                                    | %Win | Q1  | Q2  | Q3  | Q4  | Q4  | Q6  | Q7  |
 | ---------------------------------------- | ---- | --- | --- | --- | --- | --- | --- | --- |
@@ -70,7 +66,7 @@ See the results at <http://sanand0.github.io/llmmath/>.
 | meta-llama/llama-2-70b-chat              | 0%   | ❌  | ❌  | -   | -   | ❌  | ❌  | ❌  |
 | Average                                  |      | 96% | 86% | 66% | 58% | 24% | 10% | 0%  |
 
-On 26 Apr 2025, 5 models got the first 6 questions right. All are OpenAI reasoning models:
+**OpenAI's reasoning models cracked it, scoring 6/7, stumbling only on the 9-digit multiplication.**
 
 - [openai/o1-mini](https://openrouter.ai/openai/o1-mini)
 - [openai/o3](https://openrouter.ai/openai/o3)
@@ -79,7 +75,7 @@ On 26 Apr 2025, 5 models got the first 6 questions right. All are OpenAI reasoni
 - [openai/o4-mini-high](https://openrouter.ai/openai/o4-mini-high)
 
 <details>
-<summary>The reasoning traces are interesting. O3-Mini-High calculated 1234567 × 8901234 using a recursive strategy. (Click for details)</summary>
+<summary>Models use human-like mental math tricks. For example, O3-Mini-High calculated 1234567 × 8901234 using a recursive strategy. (👆 Click for details)</summary>
 
 ```
 To calculate 1234567 × 8901234, one useful method is to break the second number into two parts:
@@ -121,7 +117,7 @@ Thus, the product of 1234567 and 8901234 is
 
 </details>
 
-5 models got the first 5 questions right. Four from OpenAI, and DeepSeek V3.
+**OpenAI's other models and DeepSeek V3 were next, getting the first 5/7 right.** Notably: GPT 4.1 Mini beat GPT 4.1. DeepSeek V3 beat DeepSeek R1.
 
 - [deepseek/deepseek-chat-v3-0324](https://openrouter.ai/deepseek/deepseek-chat-v3-0324)
 - [openai/gpt-4.1-mini](https://openrouter.ai/openai/gpt-4.1-mini)
@@ -129,11 +125,10 @@ Thus, the product of 1234567 and 8901234 is
 - [openai/gpt-4o](https://openrouter.ai/openai/gpt-4o)
 - [openai/o3-mini](https://openrouter.ai/openai/o3-mini)
 
-Notably: GPT 4.1 Mini beat GPT 4.1. DeepSeek V3 beat DeepSeek R1.
 
 <details>
 
-<summary>DeepSeek V3 double-checks results and hallucinates a "reliable computational tool". (Click for details)</summary>
+<summary>DeepSeek V3 double-checks results and hallucinates a "reliable computational tool". (👆 Click for details)</summary>
 
 ```tex
 To calculate \(1234567 \times 8901234\), let's break it down using the **distributive property of multiplication over addition**:
@@ -279,7 +274,7 @@ Adding these up:
 </details>
 
 <details>
-<summary>O3 Mini follows a very interesting strategy: reframing 8901234 as (9000000 − 98766), which is how humans might approach such mental calculations. (Click for details)</summary>
+<summary>O3 Mini reframes 8901234 as (9000000 − 98766) to simplify the calculation. (👆 Click for details)</summary>
 
 ```
 To calculate 1234567 times 8901234, follow these steps:
@@ -313,7 +308,7 @@ So, 1234567 times 8901234 equals 10987935188678.
 
 </details>
 
-16 models got 4 questions right. The latest Google, Meta, and Anthropic models are in this category.
+**16 models, including the latest Gemini, Anthropic, and Llama models get 4/7 right.**
 
 - [anthropic/claude-3-opus](https://openrouter.ai/anthropic/claude-3-opus)
 - [anthropic/claude-3.5-haiku](https://openrouter.ai/anthropic/claude-3.5-haiku)
@@ -331,6 +326,10 @@ So, 1234567 times 8901234 equals 10987935188678.
 - [meta-llama/llama-4-scout](https://openrouter.ai/meta-llama/llama-4-scout)
 - [openai/gpt-4-turbo](https://openrouter.ai/openai/gpt-4-turbo)
 - [openai/gpt-4.1](https://openrouter.ai/openai/gpt-4.1)
+
+**The Amazon models, older Llama, Anthropic, Google, OpenAI models get 3 or less right.**
+
+View the results at https://sanand0.github.io/llmmath/. Hover over the cells to see the reasoning traces (where available).
 
 ## Setup
 

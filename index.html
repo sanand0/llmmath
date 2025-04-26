@@ -10,18 +10,29 @@
     type="image/svg+xml"
     href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMTYgNyAyIDcgNyAyLTcgMi0yIDctMi03LTctMiA3LTJaIi8+PC9zdmc+" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .narrative {
+      max-width: 40rem;
+    }
+  </style>
 </head>
 
 <body>
   <div class="container py-5">
-    <div class="p-5 mb-4 bg-light rounded-3">
-      <h1 class="display-4 fw-bold">LLM Mental Math</h1>
-      <div class="fs-5">
-        <p>I asked several LLMs these 7 questions, from simple to large-number multiplications, to see how they handle arithmetic.</p>
-        <p>LLMs <em>aren't</em> designed for precise math—this is just an informal test.</p>
-        <p>Hover over the cells to see the responses.</p>
-      </div>
-      <p class="lead" id="summary"></p>
+    <h1 class="display-1 my-4 text-center">LLM Mental Math</h1>
+    <h2 class="display-6 text-center">How well can LLMs multiply?</h2>
+    <div class="fs-5 my-5 p-3 mx-auto narrative bg-light rounded-3">
+      <p>I asked 50 LLMs to multiple 2 numbers:</p>
+      <ol>
+        <li>12 x 12</li>
+        <li>123 x 456</li>
+        <li>1,234 x 5,678</li>
+        <li>12,345 x 6,789</li>
+        <li>123,456 x 789,012</li>
+        <li>1,234,567 x 8,901,234</li>
+        <li>987,654,321 x 123,456,789</li>
+      </ol>
+      <p>LLMs aren&#39;t good tools for math and this is just an informal check. But the results are interesting:</p>
     </div>
 
     <table class="table table-hover table-bordered">
@@ -31,6 +42,21 @@
       <tbody id="body"></tbody>
       <tfoot id="foot"></tfoot>
     </table>
+
+    <div class="fs-5 my-5 p-3 mx-auto narrative bg-light rounded-3">
+      <ol>
+        <li><strong>OpenAI&#39;s reasoning models cracked it</strong>, scoring 6/7, stumbling only on the 9-digit multiplication.</li>
+        <li><strong>OpenAI&#39;s other models and DeepSeek V3 were next</strong>, getting the first 5/7 right. Notably: GPT 4.1 Mini beat GPT 4.1. DeepSeek V3 beat DeepSeek R1.</li>
+        <li>16 models, including the latest Gemini, Anthropic, and Llama models get 4/7 right.</li>
+        <li>The Amazon models, older Llama, Anthropic, Google, OpenAI models get 3 or less right.</li>
+      </ol>
+      <p><strong>Models use human-like mental math tricks</strong>.</p>
+      <p>For example, O3-Mini-High calculated 1234567 × 8901234 using a recursive strategy.</p>
+      <p>DeepSeek V3 double-checks results and hallucinates a &quot;reliable computational tool&quot;.</p>
+      <p>O3 Mini reframes 8901234 as (9000000 − 98766) to simplify the calculation.</p>
+      <p>For more details, see the repo at <a href="https://github.com/sanand0/llmmath">github.com/sanand0/llmmath</a>.</p>
+    </div>
+
   </div>
 
   <script type="module">
@@ -52,11 +78,6 @@
       res.win = den ? Math.round(res.pass / den * 100) : 0;
       return res;
     });
-    // correct summary: how many models achieved the highest pass count
-    const maxPass = Math.max(...stats.map(s => s.pass));
-    const topCount = stats.filter(s => s.pass === maxPass).length;
-    document.getElementById('summary').textContent =
-      `${topCount} models got ${maxPass}/7 correct.`;
 
     // sort by win desc, fail desc, name
     stats.sort((a, b) => b.win - a.win || b.fail - a.fail || a.model.localeCompare(b.model));
