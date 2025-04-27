@@ -125,7 +125,6 @@ Thus, the product of 1234567 and 8901234 is
 - [openai/gpt-4o](https://openrouter.ai/openai/gpt-4o)
 - [openai/o3-mini](https://openrouter.ai/openai/o3-mini)
 
-
 <details>
 
 <summary>DeepSeek V3 double-checks results and hallucinates a "reliable computational tool". (👆 Click for details)</summary>
@@ -308,7 +307,7 @@ So, 1234567 times 8901234 equals 10987935188678.
 
 </details>
 
-**16 models, including the latest Gemini, Anthropic, and Llama models get 4/7 right.**
+**16 models, including the latest Gemini, Anthropic, Grok, and Llama models get 4/7 right.**
 
 - [anthropic/claude-3-opus](https://openrouter.ai/anthropic/claude-3-opus)
 - [anthropic/claude-3.5-haiku](https://openrouter.ai/anthropic/claude-3.5-haiku)
@@ -326,6 +325,8 @@ So, 1234567 times 8901234 equals 10987935188678.
 - [meta-llama/llama-4-scout](https://openrouter.ai/meta-llama/llama-4-scout)
 - [openai/gpt-4-turbo](https://openrouter.ai/openai/gpt-4-turbo)
 - [openai/gpt-4.1](https://openrouter.ai/openai/gpt-4.1)
+- [x-ai/grok-3-beta](https://openrouter.ai/x-ai/grok-3-beta)
+- [x-ai/grok-3-mini-beta](https://openrouter.ai/x-ai/grok-3-mini-beta)
 
 **The Amazon models, older Llama, Anthropic, Google, OpenAI models get 3 or less right.**
 
@@ -342,6 +343,6 @@ git clone git@github.com:sanand0/llmmath.git
 cd llmmath
 export OPENROUTER_API_KEY=...
 export OPENAI_API_KEY=...
-npx promptfoo eval --config multiplication.yaml
+npx promptfoo eval
 npx promptfoo export latest -o multiplication.json
 ```

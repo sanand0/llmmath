@@ -55,6 +55,8 @@ providers:
   - openrouter:deepseek/deepseek-chat-v3-0324
   - openrouter:deepseek/deepseek-r1
   - openrouter:qwen/qwen-2-72b-instruct
+  - openrouter:x-ai/grok-3-beta
+  - openrouter:x-ai/grok-3-mini-beta
 
   # - openrouter:openai/o1-pro                      # Too expensive
   # - openrouter:openai/o1                          # Too expensive
