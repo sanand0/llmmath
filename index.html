@@ -67,42 +67,55 @@
 
   <script type="module">
     const { config, results } = await(await fetch('multiplication.json')).json();
-    const tests = config.tests.map(t => t.description);
+    const tests = config.tests.map(t => t.description.replace(/,/g, '').replace(/\s*x\s*/g, 'x'));;
     const entries = results.results;
     const models = [...new Set(entries.map(r => r.provider.id || r.provider))];
     const stats = models.map(m => {
-      const res = { model: m, pass: 0, fail: 0, error: 0, blank: 0 };
+      const res = { m, pass: 0, fail: 0, error: 0, blank: 0, totalAttempts: 0 };
       tests.forEach((d, i) => {
-        const r = entries.find(r => (r.provider.id || r.provider) === m && r.testIdx === i);
-        const o = r.response;
-        if (o?.error) res.error++;
-        else if (!(o?.output || '').trim()) res.blank++;
-        else if (r.success) res.pass++;
-        else res.fail++;
+        const r = entries.filter(r => (r.provider.id || r.provider) === m && `${r.vars.a}x${r.vars.b}` === d);
+        const attempts = r.length;
+        const correct = r.filter(r => r.success).length;
+        const errors = r.filter(r => r.response?.error).length;
+        const blanks = r.filter(r => !(r.response?.output || '').trim() && !r.response?.error).length;
+        const fails = attempts - correct - errors - blanks;
+        res[d] = {attempts,correct,blanks,errors,fails,accuracy: attempts > 0 ? Math.round((correct / attempts) * 100) : 0
+        };
+        res.totalAttempts += attempts;
+        res.pass += correct;
+        res.blank += blanks;
+        res.error += errors;
+        res.fail += fails;
+
       });
-      const den = res.pass + res.fail;
-      res.win = den ? Math.round(res.pass / den * 100) : 0;
+
+      res.overallAccuracy = res.totalAttempts > 0 ? Math.round(res.pass / res.totalAttempts * 100) : 0;
       return res;
     });
 
-    // sort by win desc, fail desc, name
-    stats.sort((a, b) => b.win - a.win || b.fail - a.fail || a.model.localeCompare(b.model));
+    // sort by overall accuracy, name
+    stats.sort((a, b) => b.overallAccuracy - a.overallAccuracy || a.m.localeCompare(b.m));
 
     // header
     document.getElementById('headerRow').innerHTML =
-      ['Model', '%Win', ...tests].map(h => `<th>${h}</th>`).join('');
+      ['m', '%Win', ...tests].map(h => `<th>${h}</th>`).join('');
 
     // body
     const b = document.getElementById('body');
     stats.forEach(s => {
-      const cells = tests.map((d, i) => {
-        const r = entries.find(r => (r.provider.id || r.provider) === s.model && r.testIdx === i);
-        const o = r.response;
-        const st = o?.error ? 'ERROR' : !(o?.output || '').trim() ? 'BLANK' : (r.success ? 'PASS' : 'FAIL');
-        const cls = st === 'PASS' ? 'table-success' : st === 'FAIL' ? 'table-danger' : 'table-warning';
-        return `<td class="${cls}" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="${o.error ?? o.output}">${st}</td>`;
+      const cells = tests.map(d => {
+        const r = s[d];
+        const text = `${r.correct}/${r.attempts} (${r.accuracy}%)`;
+        const cls = r.accuracy === 100 ? 'table-success' : r.accuracy >= 50 ? 'table-warning' : 'table-danger';
+        return `<td class="${cls}" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="${text}">${text}</td>`;
       }).join('');
-      b.insertAdjacentHTML('beforeend', `<tr><th>${s.model}</th><td>${s.win}%</td>${cells}</tr>`);
+
+      b.insertAdjacentHTML('beforeend',
+        `<tr>
+          <th>${s.m}</th>
+          <td>${s.pass}/${s.totalAttempts} (${s.overallAccuracy}%)</td>
+          ${cells}
+        </tr>`);
     });
 
     // Initialize popovers
@@ -110,14 +123,13 @@
 
     // footer averages
     const f = document.getElementById('foot');
-    const avg = tests.map((d, i) =>
-      Math.round(stats.filter(s => {
-        const r = entries.find(r => (r.provider.id || r.provider) === s.model && r.testIdx === i);
-        return r.success;
-      }).length / models.length * 100)
-    );
-    f.innerHTML = `<tr class="table-secondary"><th>Average</th><th></th>` +
-      avg.map(a => `<th>${a}%</th>`).join('') + `</tr>`;
+    const avg = tests.map(d => {
+      const pass = stats.reduce((sum, s) => sum + s[d].correct, 0);
+      const totalAttempts = stats.reduce((sum, s) => sum + s[d].attempts, 0);
+      return totalAttempts > 0 ? Math.round(pass / totalAttempts * 100) : 0;
+    });
+    f.innerHTML = `<tr class="table-secondary"><th>Average</th><th></th>${avg.map(a => `<th>${a}%</th>`).join('')}</tr>`;
+
   </script>
 </body>
 
