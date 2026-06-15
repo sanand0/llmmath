@@ -343,6 +343,53 @@ git clone git@github.com:sanand0/llmmath.git
 cd llmmath
 export OPENROUTER_API_KEY=...
 export OPENAI_API_KEY=...
-npx promptfoo eval
-npx promptfoo export latest -o multiplication.json
+npm install
+npm run eval:new
 ```
+
+Add OpenRouter model IDs to `new-models.txt` before running `npm run eval:new`. The command skips models already present in
+`multiplication.json`, evaluates each missing model five times per multiplication, and merges the new results into the existing file.
+To run selected models only, pass their IDs after `--`, for example:
+
+```bash
+npm run eval:new -- deepseek/deepseek-v4-flash mistralai/mistral-small-2603
+```
+
+If a run is interrupted after PromptFoo writes `.promptfoo-new.json`, merge the completed output with:
+
+```bash
+npm run eval:new -- --resume
+```
+
+The lockfile pins PromptFoo `0.121.15` with `undici` `7.27.0`. This applies PromptFoo's merged Node 26 transport fix while a newer
+PromptFoo npm release is not yet available.
+
+## Adding models
+
+1. Confirm the exact model ID in the [OpenRouter model list](https://openrouter.ai/models).
+2. Add `openrouter:<model-id>` to `providers` in `promptfooconfig.yaml`. This keeps the complete benchmark configuration documented.
+3. Add the bare `<model-id>` to `new-models.txt`. This is the incremental run queue.
+4. Run a cheap subset first:
+
+   ```bash
+   npm run eval:new -- <model-id-1> <model-id-2>
+   ```
+
+5. Check the page and results, then run every remaining queued model:
+
+   ```bash
+   npm run eval:new
+   ```
+
+For each model not already present in `multiplication.json`, the update command runs all seven tests five times through PromptFoo and
+OpenRouter. It then:
+
+- merges the new provider prompts and 35 results into `multiplication.json`;
+- records the UTC evaluation date in `model-dates.json`;
+- updates aggregate PromptFoo statistics and the provider configuration stored in the result artifact;
+- leaves every existing provider result and result ID unchanged; and
+- skips models already present in `multiplication.json`, so rerunning the command does not spend money on them again.
+
+PromptFoo writes the current incremental run to `.promptfoo-new.json` before it is merged. If the command is interrupted after that file
+is complete, run `npm run eval:new -- --resume`. Assertion failures and provider/API errors are retained as benchmark outcomes rather than
+silently retried.

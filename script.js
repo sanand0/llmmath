@@ -1,8 +1,13 @@
 import { scaleSequential } from "https://cdn.jsdelivr.net/npm/d3-scale@4/+esm";
 import { interpolateRdYlGn } from "https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3/+esm";
 
-const { config, results } = await (await fetch("multiplication.json")).json();
-const tests = config.tests.map((t) => t.description.replace(/,/g, "").replace(/\s*x\s*/g, "x"));
+const [{ config, results }, modelDates] = await Promise.all([
+  fetch("multiplication.json").then((response) => response.json()),
+  fetch("model-dates.json").then((response) => response.json()),
+]);
+const tests = config.tests.map((t) =>
+  t.description.replace(/,/g, "").replace(/\s*x\s*/g, "x"),
+);
 const entries = results.results;
 const models = [...new Set(entries.map((r) => r.provider.id || r.provider))];
 
@@ -19,17 +24,30 @@ const getTextColor = (bgColor) => {
 };
 
 const stats = models.map((m) => {
-  const res = { m, pass: 0, fail: 0, error: 0, blank: 0, totalAttempts: 0 };
+  const res = {
+    m,
+    date: modelDates.models[m] ?? modelDates.default,
+    pass: 0,
+    fail: 0,
+    error: 0,
+    blank: 0,
+    totalAttempts: 0,
+  };
 
   tests.forEach((d) => {
     // Get all responses for this model and test
-    const responses = entries.filter((r) => (r.provider.id || r.provider) === m && `${r.vars.a}x${r.vars.b}` === d);
+    const responses = entries.filter(
+      (r) =>
+        (r.provider.id || r.provider) === m && `${r.vars.a}x${r.vars.b}` === d,
+    );
 
     // Count different types of responses
     const attempts = responses.length;
     const correct = responses.filter((r) => r.success).length;
     const errors = responses.filter((r) => r.response?.error).length;
-    const blanks = responses.filter((r) => !(r.response?.output || "").trim() && !r.response?.error).length;
+    const blanks = responses.filter(
+      (r) => !(r.response?.output || "").trim() && !r.response?.error,
+    ).length;
     const fails = attempts - correct - errors - blanks;
 
     // Store the responses for popover content
@@ -51,57 +69,108 @@ const stats = models.map((m) => {
     res.fail += fails;
   });
 
-  res.overallAccuracy = res.totalAttempts > 0 ? Math.round((res.pass / res.totalAttempts) * 100) : 0;
+  res.overallAccuracy =
+    res.totalAttempts > 0
+      ? Math.round((res.pass / res.totalAttempts) * 100)
+      : 0;
   return res;
 });
 
-// Sort by overall accuracy, then name
-stats.sort((a, b) => b.overallAccuracy - a.overallAccuracy || a.m.localeCompare(b.m));
+const columns = [
+  { label: "Model", value: (row) => row.m },
+  { label: "Tested", value: (row) => row.date },
+  { label: "%Win", value: (row) => row.overallAccuracy },
+  ...tests.map((test) => ({ label: test, value: (row) => row[test].accuracy })),
+];
+let sortColumn = 2;
+let sortDirection = -1;
 
-// Header
-document.getElementById("headerRow").innerHTML = ["Model", "%Win", ...tests]
-  .map((h) => `<th class="text-end">${h}</th>`)
-  .join("");
+const compare = (left, right) =>
+  typeof left === "number"
+    ? left - right
+    : left.localeCompare(right, undefined, { numeric: true });
 
-// Body
+const renderHeader = () => {
+  document.getElementById("headerRow").innerHTML = columns
+    .map(
+      ({ label }, index) =>
+        `<th class="text-end" aria-sort="${
+          index === sortColumn
+            ? sortDirection === 1
+              ? "ascending"
+              : "descending"
+            : "none"
+        }"><button class="btn btn-link p-0 text-decoration-none fw-bold text-nowrap" data-sort="${index}">${label}${
+          index === sortColumn ? (sortDirection === 1 ? " ▲" : " ▼") : ""
+        }</button></th>`,
+    )
+    .join("");
+};
+
 const b = document.getElementById("body");
-stats.forEach((s) => {
-  const cells = tests
-    .map((d) => {
-      const r = s[d];
-      const text = `${r.correct}/${r.attempts}`;
+const renderBody = () => {
+  stats.sort(
+    (left, right) =>
+      sortDirection *
+        compare(
+          columns[sortColumn].value(left),
+          columns[sortColumn].value(right),
+        ) || left.m.localeCompare(right.m),
+  );
+  b.innerHTML = "";
+  stats.forEach((s) => {
+    const cells = tests
+      .map((d) => {
+        const r = s[d];
+        const text = `${r.correct}/${r.attempts}`;
 
-      // Generate popover content with numbered list of responses
-      let popoverContent = "";
-      if (r.responses?.length) {
-        const responseList = r.responses
-          .map((resp, idx) => {
-            if (resp.response?.error) return `${idx + 1}. Error: ${resp.response.error}`;
-            return `${idx + 1}. ${resp.response?.output || "[No output]"}`.trim();
-          })
-          .join("<br>");
-        popoverContent = responseList.replace(/"/g, "&quot;");
-      }
+        // Generate popover content with numbered list of responses
+        let popoverContent = "";
+        if (r.responses?.length) {
+          const responseList = r.responses
+            .map((resp, idx) => {
+              if (resp.response?.error)
+                return `${idx + 1}. Error: ${resp.response.error}`;
+              return `${idx + 1}. ${resp.response?.output || "[No output]"}`.trim();
+            })
+            .join("<br>");
+          popoverContent = responseList.replace(/"/g, "&quot;");
+        }
 
-      // Get background color based on accuracy
-      const bgColor = colorScale(r.accuracy);
-      const textColor = getTextColor(bgColor);
+        // Get background color based on accuracy
+        const bgColor = colorScale(r.accuracy);
+        const textColor = getTextColor(bgColor);
 
-      return `<td class="text-end" data-bs-toggle="popover" data-bs-placement="top"
+        return `<td class="text-end" data-bs-toggle="popover" data-bs-placement="top"
                data-bs-html="true" data-bs-content="${popoverContent}"
                style="background-color:${bgColor}; color:${textColor}">${text}</td>`;
-    })
-    .join("");
+      })
+      .join("");
 
-  b.insertAdjacentHTML(
-    "beforeend",
-    `<tr>
+    b.insertAdjacentHTML(
+      "beforeend",
+      `<tr>
       <th class="text-end">${s.m}</th>
+      <td class="text-end text-nowrap">${s.date}</td>
       <td class="text-end text-nowrap">${s.pass}/${s.totalAttempts} (${s.overallAccuracy}%)</td>
       ${cells}
-    </tr>`
-  );
+    </tr>`,
+    );
+  });
+};
+
+document.getElementById("headerRow").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-sort]");
+  if (!button) return;
+  const nextColumn = Number(button.dataset.sort);
+  sortDirection = nextColumn === sortColumn ? -sortDirection : 1;
+  sortColumn = nextColumn;
+  renderHeader();
+  renderBody();
 });
+
+renderHeader();
+renderBody();
 
 // Initialize popovers
 bootstrap.Popover.getOrCreateInstance(document.body, {
@@ -119,6 +188,7 @@ const avg = tests.map((d) => {
 
 foot.innerHTML = `<tr class="table-secondary">
   <th class="text-end">Average</th>
+  <th class="text-end"></th>
   <th class="text-end"></th>
   ${avg.map((a) => `<th class="text-end">${a}%</th>`).join("")}
 </tr>`;

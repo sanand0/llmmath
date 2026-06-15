@@ -57,6 +57,21 @@ providers:
   - openrouter:qwen/qwen-2-72b-instruct
   - openrouter:x-ai/grok-3-beta
   - openrouter:x-ai/grok-3-mini-beta
+  - openrouter:deepseek/deepseek-v4-flash
+  - openrouter:openai/gpt-5.4-nano
+  - openrouter:openai/gpt-5.4-mini
+  - openrouter:openai/gpt-5.5
+  - openrouter:google/gemini-3-flash-preview
+  - openrouter:google/gemini-3.1-flash-lite
+  - openrouter:google/gemini-3.1-pro-preview
+  - openrouter:google/gemini-3.5-flash
+  - openrouter:anthropic/claude-haiku-4.5
+  - openrouter:anthropic/claude-sonnet-4.6
+  - openrouter:anthropic/claude-opus-4.8
+  - openrouter:x-ai/grok-4.3
+  - openrouter:qwen/qwen3.7-plus
+  - openrouter:mistralai/mistral-small-2603
+  - openrouter:amazon/nova-2-lite-v1
 
   # - openrouter:openai/o1-pro                      # Too expensive
   # - openrouter:openai/o1                          # Too expensive
@@ -92,7 +107,7 @@ tests:
   - description: "1,234,567 x 8,901,234"
     vars: { a: 1234567, b: 8901234, expected: 10989169755678 }
   - description: "987,654,321 x 123,456,789"
-    vars: { a: 987654321, b: 123456789, expected: 121932631112635269 }
+    vars: { a: 987654321, b: 123456789, expected: "121932631112635269" }
 
 # Persist for the web viewer
 writeLatestResults: true

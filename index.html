@@ -19,6 +19,10 @@
       white-space: pre-wrap;
       font-family: var(--bs-font-monospace);
     }
+
+    thead button {
+      color: inherit !important;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
@@ -28,7 +32,7 @@
     <h1 class="display-1 my-4 text-center">LLM Mental Math</h1>
     <h2 class="display-6 text-center">How well can LLMs multiply?</h2>
     <div class="fs-5 my-5 p-3 mx-auto narrative bg-light rounded-3">
-      <p>I asked 50 LLMs to multiple 2 numbers:</p>
+      <p>I asked 67 LLMs to multiply 2 numbers, five times each:</p>
       <ol>
         <li>12 x 12</li>
         <li>123 x 456</li>
@@ -50,6 +54,17 @@
     </table>
 
     <div class="fs-5 my-5 p-3 mx-auto narrative bg-light rounded-3">
+      <h2 class="h3">Update: 15 June 2026</h2>
+      <ol>
+        <li><strong>Three newer models got every multiplication right:</strong> GPT-5.5, Claude Opus 4.8, and Grok 4.3 scored 35/35.</li>
+        <li><strong>Qwen 3.7 Plus nearly matched them</strong>, scoring 34/35, followed by Claude Sonnet 4.6 at 32/35.</li>
+        <li>Gemini 3 Flash Preview, Gemini 3.1 Pro Preview, and GPT-5.4 Mini each scored 30/35.</li>
+        <li>Not every newer model improved: Amazon Nova 2 Lite scored 10/35.</li>
+      </ol>
+      <p>The perfect scores are a major improvement over May 2025, when no model solved the hardest 9-digit multiplication.</p>
+      <p><small>The update also fixes the hardest test&#39;s expected value, which JavaScript rounded in the earlier run. Older models were not rerun, so comparisons on that test are imperfect.</small></p>
+
+      <h2 class="h3 mt-5">Original summary: 16 May 2025</h2>
       <ol>
         <li><strong>OpenAI&#39;s reasoning models cracked it</strong>, scoring 6/7, stumbling only on the 9-digit multiplication.</li>
         <li><strong>OpenAI&#39;s other models and DeepSeek V3 were next</strong>, getting the first 5/7 right. Notably: GPT 4.1 Mini beat GPT 4.1. DeepSeek V3 beat DeepSeek R1.</li>

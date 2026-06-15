@@ -1,0 +1,14 @@
+{
+  "name": "llmmath",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval:new": "node update-models.js"
+  },
+  "dependencies": {
+    "promptfoo": "0.121.15"
+  },
+  "overrides": {
+    "undici": "7.27.0"
+  }
+}
