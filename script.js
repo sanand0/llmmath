@@ -27,6 +27,7 @@ const stats = models.map((m) => {
   const res = {
     m,
     date: modelDates.models[m] ?? modelDates.default,
+    modelDate: modelDates.released[m] ?? "—",
     pass: 0,
     fail: 0,
     error: 0,
@@ -78,7 +79,7 @@ const stats = models.map((m) => {
 
 const columns = [
   { label: "Model", value: (row) => row.m },
-  { label: "Tested", value: (row) => row.date },
+  { label: "Model Date", value: (row) => row.modelDate },
   { label: "%Win", value: (row) => row.overallAccuracy },
   ...tests.map((test) => ({ label: test, value: (row) => row[test].accuracy })),
 ];
@@ -151,7 +152,7 @@ const renderBody = () => {
       "beforeend",
       `<tr>
       <th class="text-end">${s.m}</th>
-      <td class="text-end text-nowrap">${s.date}</td>
+      <td class="text-end text-nowrap">${s.modelDate}</td>
       <td class="text-end text-nowrap">${s.pass}/${s.totalAttempts} (${s.overallAccuracy}%)</td>
       ${cells}
     </tr>`,
